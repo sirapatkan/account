@@ -3,6 +3,7 @@ import 'package:account/model/transaction.dart';
 import 'package:account/provider/transactionProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';  // นำเข้า intl package สำหรับการจัดรูปแบบวันที่
 
 void main() {
   runApp(const MyApp());
@@ -11,7 +12,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -45,42 +45,47 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Text(widget.title),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return FormScreen();
-                }));
-              },
-            )
-          ],
-        ),
-        body: Consumer(
-            builder: (context, TransactionProvider provider, Widget? child) {
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return FormScreen();
+              }));
+            },
+          )
+        ],
+      ),
+      body: Consumer<TransactionProvider>(
+        builder: (context, provider, child) {
           return ListView.builder(
-              itemCount: provider.transactions.length,
-              itemBuilder: (context, int index) {
-                Transaction data = provider.transactions[index];
-                return Card(
-                  elevation: 3,
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
-                  child: ListTile(
-                    title: Text(provider.transactions[index].title),
-                    subtitle: Text('วันที่บันทึกข้อมูล'),
-                    leading: CircleAvatar(
-                      child: FittedBox(
-                        child: Text(data.amount.toString()),
+            itemCount: provider.transactions.length,
+            itemBuilder: (context, int index) {
+              Transaction data = provider.transactions[index];
 
-                      ),
+              // แปลง DateTime เป็นรูปแบบที่ต้องการ
+              String formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(data.date);
+
+              return Card(
+                elevation: 3,
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+                child: ListTile(
+                  title: Text(data.title),
+                  subtitle: Text(formattedDate),  // แสดงวันเวลาใน subtitle
+                  leading: CircleAvatar(
+                    child: FittedBox(
+                      child: Text(data.amount.toString()),
                     ),
                   ),
-                );
-              });
-        }));
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 }
